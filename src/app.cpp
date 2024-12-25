@@ -1,6 +1,7 @@
 #include "app.h"
 
-App::App() {
+App::App(int argc, char** argv) {
+    decodeArgs(argc, argv);
     loadData();
 }
 
@@ -21,7 +22,10 @@ void App::loadData() {
 
 void App::saveData() {
     json data;
-    for (const auto& [key, value] : pressedKeys) data[keyToString(key)] = value;
+    for (const auto& [key, value] : pressedKeys) {
+        std::string strKey = keyToString(key);
+        if (strKey != "UNKNOWN") data[strKey] = value;
+    }
 
     std::ofstream file("data/keys.json");
     if (file.is_open()) {
@@ -31,6 +35,22 @@ void App::saveData() {
     file.close();
 }
 
+void App::decodeArgs(int argc, char** argv) {
+    if (argc > 1) for (int i = 0; i < argc - 1; i++) {
+        std::string arg = argv[i];
+        std::string nextArg = argv[i + 1];
+        if (arg != "-d") continue;
+
+        try {
+            delay = std::stoi(nextArg);
+        } catch (const std::invalid_argument&) {
+            throw std::runtime_error("Arg is not an integer");
+        } catch (const std::out_of_range&) {
+            throw std::runtime_error("Value is out of range");
+        }
+    } else delay = 60;
+}
+
 void App::run() {
     std::unordered_map<char, bool> lastKeyState;
     auto start = std::chrono::system_clock::now();
@@ -38,7 +58,7 @@ void App::run() {
     while (true) {
         auto now = std::chrono::system_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
-        if (elapsed >= 300) {
+        if (elapsed >= delay) {
             saveData();
             start = now;
         }

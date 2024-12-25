@@ -6,10 +6,10 @@ INCLUDE_DIR = include
 APP_NAME = Keysotron.exe
 
 all:
-	make game
+	make app
 	make run
 
-game:
+app:
 	$(CC) -std=$(CPP_VERSION) -m64 -o $(BIN_DIR)/$(APP_NAME) $(SRC_DIR)/*.cpp -I$(INCLUDE_DIR)
 
 wl:
@@ -17,3 +17,6 @@ wl:
 
 run:
 	cd $(BIN_DIR) && $(APP_NAME)
+
+test:
+	cd $(BIN_DIR) && $(APP_NAME) -d 1
